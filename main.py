@@ -1,5 +1,6 @@
-# Import the necessary Flask components
+# Import the necessary Flask components and os for environment variables
 from flask import Flask, request, jsonify
+import os # Import the os module to access environment variables
 
 # Create a Flask application instance
 app = Flask(__name__)
@@ -8,26 +9,20 @@ app = Flask(__name__)
 @app.route('/', methods=['GET'])
 def generate_even_numbers():
     """
-    Generates a specified number of even numbers based on the 'n' query parameter.
+    Generates a fixed number of even numbers.
+    The value of 'n' is now set directly within the program.
     Returns a JSON object containing the list of even numbers.
     """
     try:
-        # Get the value of the 'n' query parameter from the request URL
-        # For example, if the URL is /?n=10, request.args.get('n') will be '10'
-        n_str = request.args.get('n')
-
-        # Check if 'n' parameter is provided
-        if not n_str:
-            # If 'n' is missing, return an error message with a 400 status code (Bad Request)
-            return jsonify({"error": "Please provide the 'n' parameter in the URL (e.g., /?n=10)"}), 400
-
-        # Convert the 'n' parameter string to an integer
-        n = int(n_str)
+        # Define 'n' directly within the program.
+        # You can change this value to generate a different number of even numbers.
+        n = 10 # Example: Generate the first 10 even numbers
 
         # Check if 'n' is a non-negative integer
         if n < 0:
              # If 'n' is negative, return an error message with a 400 status code
-             return jsonify({"error": "'n' must be a non-negative integer"}), 400
+             # This check is still useful if 'n' is hardcoded to a negative value by mistake
+             return jsonify({"error": "'n' must be a non-negative integer (set within the code)"}), 400
 
         # Initialize an empty list to store the even numbers
         even_numbers = []
@@ -50,18 +45,16 @@ def generate_even_numbers():
         # Return the list of generated even numbers as a JSON response
         return jsonify({"even_numbers": even_numbers})
 
-    except ValueError:
-        # If the 'n' parameter cannot be converted to an integer, catch the ValueError
-        # Return an error message indicating invalid input with a 400 status code
-        return jsonify({"error": "Invalid input for 'n'. Please provide an integer."}), 400
     except Exception as e:
-        # Catch any other unexpected errors
+        # Catch any unexpected errors
         # Return a generic internal server error message with a 500 status code
         return jsonify({"error": f"An internal error occurred: {str(e)}"}), 500
 
 # This block is executed only when the script is run directly (not imported as a module)
 if __name__ == '__main__':
-    # Run the Flask application
-    # debug=True allows for automatic reloading on code changes and provides a debugger
-    # In a production environment, you would typically use a production-ready WSGI server
-    app.run(debug=True)
+    # Get the port from the environment variable 'PORT' provided by Railway, default to 5000 if not set
+    # This is crucial for deployment on platforms like Railway
+    port = int(os.environ.get('PORT', 5000))
+    # Run the Flask application, binding to 0.0.0.0 to be accessible externally
+    # Debug mode is set to False for production environments
+    app.run(host='0.0.0.0', port=port, debug=False)
